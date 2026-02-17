@@ -5,8 +5,8 @@ import startScreenImg from './assets/cave_entrance.jpg';
 import golemImg from './assets/golem.jpg';
 import shadowBeastImg from './assets/shadow_beast.jpg';
 import toxicGasImg from './assets/toxic_gas.jpg';
-import rootsImg from './assets/cave_entrance.jpg'; // Re-using cave entrance for roots
-import abyssImg from './assets/abyss.jpg';
+import rootsImg from './assets/roots.jpg';
+import abyssImg from './assets/abyss.png';
 import arcaneGuardianImg from './assets/arcane_guardian.jpg';
 import shadowGuardiansImg from './assets/shadow_guardians.jpg';
 import batsImg from './assets/bats.jpg';
