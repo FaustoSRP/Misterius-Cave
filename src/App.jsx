@@ -12,6 +12,7 @@ import shadowGuardiansImg from './assets/shadow_guardians.jpg';
 import batsImg from './assets/bats.jpg';
 import collapseImg from './assets/collapse.jpg';
 import voidPathImg from './assets/abyss.png';
+import echoesImg from './assets/echoes_of_madness.png';
 
 // Initial Explorer State
 const INITIAL_STATS = {
@@ -122,6 +123,7 @@ const OBSTACLES = [
     id: 'mid_4',
     text: "Ecos de locura susurran en tu mente.",
     minDepth: 120,
+    image: echoesImg,
     options: [
       { text: "Concentrarse en la lógica para no ceder", stat: 'conocimiento', difficulty: 12 },
       { text: "Gritar para acallar las voces", stat: 'fuerza', difficulty: 18 }
