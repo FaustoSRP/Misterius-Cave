@@ -6,12 +6,12 @@ import golemImg from './assets/golem.jpg';
 import shadowBeastImg from './assets/shadow_beast.jpg';
 import toxicGasImg from './assets/toxic_gas.jpg';
 import rootsImg from './assets/roots.jpg';
-import abyssImg from './assets/abyss.png';
+import abyssImg from './assets/void_path.jpg';
 import arcaneGuardianImg from './assets/arcane_guardian.jpg';
 import shadowGuardiansImg from './assets/shadow_guardians.jpg';
 import batsImg from './assets/bats.jpg';
 import collapseImg from './assets/collapse.jpg';
-import voidPathImg from './assets/void_path.jpg'; // Old start screen is now void path
+import voidPathImg from './assets/abyss.png';
 
 // Initial Explorer State
 const INITIAL_STATS = {
