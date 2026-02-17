@@ -8,7 +8,7 @@ import toxicGasImg from './assets/toxic_gas.jpg';
 import rootsImg from './assets/roots.jpg';
 import abyssImg from './assets/void_path.jpg';
 import arcaneGuardianImg from './assets/arcane_guardian.jpg';
-import shadowGuardiansImg from './assets/shadow_guardians.jpg';
+import ancientDoorImg from './assets/ancient_door.png';
 import batsImg from './assets/bats.jpg';
 import collapseImg from './assets/collapse.jpg';
 import voidPathImg from './assets/abyss.png';
@@ -102,7 +102,7 @@ const OBSTACLES = [
     id: 'mid_2',
     text: "Una inscripción antigua bloquea una puerta sellada.",
     minDepth: 100,
-    image: shadowGuardiansImg, // Using Shadow Guardians for the sealed door encounter
+    image: ancientDoorImg,
     options: [
       { text: "Descifrar el acertijo", stat: 'conocimiento', difficulty: 10 },
       { text: "Forzar la puerta a golpes", stat: 'fuerza', difficulty: 20 }
