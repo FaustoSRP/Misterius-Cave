@@ -1,10 +1,17 @@
 import { useState } from 'react';
 import './App.css';
 
-import startScreenImg from './assets/start_screen.jpg';
+import startScreenImg from './assets/cave_entrance.jpg';
 import golemImg from './assets/golem.jpg';
 import shadowBeastImg from './assets/shadow_beast.jpg';
 import toxicGasImg from './assets/toxic_gas.jpg';
+import rootsImg from './assets/cave_entrance.jpg'; // Re-using cave entrance for roots
+import abyssImg from './assets/abyss.jpg';
+import arcaneGuardianImg from './assets/arcane_guardian.jpg';
+import shadowGuardiansImg from './assets/shadow_guardians.jpg';
+import batsImg from './assets/bats.jpg';
+import collapseImg from './assets/collapse.jpg';
+import voidPathImg from './assets/void_path.jpg'; // Old start screen is now void path
 
 // Initial Explorer State
 const INITIAL_STATS = {
@@ -39,6 +46,7 @@ const OBSTACLES = [
     id: 'low_1',
     text: "Un gran derrumbe bloquea el paso.",
     minDepth: 0,
+    image: collapseImg,
     options: [
       { text: "Intentar mover las rocas", stat: 'fuerza', difficulty: 2 }, // Optimal (Easy start)
       { text: "Tratar de escalar por encima", stat: 'agilidad', difficulty: 5 }, // Harder
@@ -49,6 +57,7 @@ const OBSTACLES = [
     id: 'low_2',
     text: "Una fosa profunda interrumpe el camino.",
     minDepth: 0,
+    image: abyssImg,
     options: [
       { text: "Tomar impulso y saltar", stat: 'agilidad', difficulty: 3 }, // Optimal (Easy start)
       { text: "Analizar el entorno en busca de ayuda", stat: 'conocimiento', difficulty: 9 },
@@ -58,6 +67,7 @@ const OBSTACLES = [
     id: 'low_3',
     text: "Una colonia de murciélagos gigantes se despierta.",
     minDepth: 0,
+    image: batsImg,
     options: [
       { text: "Ahuyentarlos con una antorcha improvisada", stat: 'conocimiento', difficulty: 4 },
       { text: "Correr y esquivar sus ataques", stat: 'agilidad', difficulty: 6 },
@@ -68,7 +78,7 @@ const OBSTACLES = [
     id: 'low_4',
     text: "Raíces espinosas cubren el suelo.",
     minDepth: 0,
-    image: toxicGasImg, // Using green toxic image for roots as placeholder/match
+    image: rootsImg, // Using new roots image
     options: [
       { text: "Cortarlas con fuerza bruta", stat: 'fuerza', difficulty: 3 },
       { text: "Caminar con extremo cuidado", stat: 'agilidad', difficulty: 7 }
@@ -91,6 +101,7 @@ const OBSTACLES = [
     id: 'mid_2',
     text: "Una inscripción antigua bloquea una puerta sellada.",
     minDepth: 100,
+    image: shadowGuardiansImg, // Using Shadow Guardians for the sealed door encounter
     options: [
       { text: "Descifrar el acertijo", stat: 'conocimiento', difficulty: 10 },
       { text: "Forzar la puerta a golpes", stat: 'fuerza', difficulty: 20 }
@@ -134,6 +145,7 @@ const OBSTACLES = [
     id: 'high_2',
     text: "El Guardián Arcano te cierra el paso.",
     minDepth: 220,
+    image: arcaneGuardianImg,
     options: [
       { text: "Duelo de voluntad mágica", stat: 'conocimiento', difficulty: 22 },
       { text: "Esquivar sus rayos desintegradores", stat: 'agilidad', difficulty: 22 },
@@ -144,6 +156,7 @@ const OBSTACLES = [
     id: 'high_3',
     text: "El camino se derrumba hacia el vacío infinito.",
     minDepth: 240,
+    image: voidPathImg, // Using the image user identified as 'Path to the void'
     options: [
       { text: "Dar el salto de fe más grande de tu vida", stat: 'agilidad', difficulty: 24 },
       { text: "Aferrarse a la pared con fuerza sobrehumana", stat: 'fuerza', difficulty: 25 }
