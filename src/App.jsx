@@ -227,6 +227,14 @@ function App() {
 
   const getRandomLog = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
+  const getXpForSuccess = (difficulty) => {
+    return Math.max(5, Math.min(40, Math.floor(difficulty * 4)));
+  };
+
+  const getXpForFailure = (successXp) => {
+    return Math.max(2, Math.floor(successXp * 0.25));
+  };
+
   // Helper to calculate cost: Base * 1.2 ^ (Current - 1)
   // Level 1 -> 50
   // Level 10 -> ~257
@@ -291,9 +299,7 @@ function App() {
 
     if (success) {
       addLog(`¡ÉXITO! ${getRandomLog(SUCCESS_MSGS)}`);
-      // XP scales with effective difficulty or specific option.xp
-      const baseXP = option.xp || (option.difficulty * 10);
-      const xpGained = baseXP + (depthMalus * 10);
+      const xpGained = getXpForSuccess(effectiveDifficulty);
       const newDepth = depth + 10;
 
       addLog(`+${xpGained} XP`);
@@ -317,9 +323,7 @@ function App() {
       setCurrentEnergy(newEnergy);
       addLog(`FALLO: ${getRandomLog(FAILURE_MSGS)} -${damage} Energía.`);
 
-      // Partial XP on failure (50% of what success would give)
-      const baseXP = option.xp || (option.difficulty * 10);
-      const failXP = Math.floor((baseXP + (depthMalus * 10)) * 0.5) || 5;
+      const failXP = getXpForFailure(getXpForSuccess(effectiveDifficulty));
       setRunXP(prev => prev + failXP);
       addLog(`+${failXP} XP (parcial)`);
 
@@ -544,6 +548,11 @@ function App() {
             )}
             {gameStatus === 'failed' && (
               <img src={defeatImg} className="cave-image" alt="Derrota" />
+            )}
+
+            {/* Fallback only if some state has no image */}
+            {(gameStatus === 'failed' || gameStatus === 'victory') && !victoryImg && !defeatImg && (
+              <div className="cave-mouth"></div>
             )}
 
             {gameStatus === 'exploring' && (
