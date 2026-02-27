@@ -13,6 +13,8 @@ import batsImg from './assets/bats.jpg';
 import collapseImg from './assets/collapse.jpg';
 import voidPathImg from './assets/abyss.png';
 import echoesImg from './assets/echoes_of_madness.png';
+import victoryImg from './assets/victory.png';
+import defeatImg from './assets/defeat.png';
 
 // Initial Explorer State
 const INITIAL_STATS = {
@@ -22,6 +24,9 @@ const INITIAL_STATS = {
   energia: 100,
   rango: 'Novato'
 };
+
+const ENERGY_UPGRADE_STEP = 10; // +10 per upgrade
+const MAX_ENERGY = 300;
 
 const getStatDescription = (val) => {
   if (val < 5) return "Muy Débil";
@@ -49,9 +54,9 @@ const OBSTACLES = [
     minDepth: 0,
     image: collapseImg,
     options: [
-      { text: "Intentar mover las rocas", stat: 'fuerza', difficulty: 2 }, // Optimal (Easy start)
-      { text: "Tratar de escalar por encima", stat: 'agilidad', difficulty: 5 }, // Harder
-      { text: "Buscar una grieta o ruta alterna", stat: 'conocimiento', difficulty: 8 }
+      { text: "Intentar mover las rocas", stat: 'fuerza', difficulty: 2, damage: 15, xp: 50 }, // Optimal (Easy start)
+      { text: "Tratar de escalar por encima", stat: 'agilidad', difficulty: 5, damage: 20, xp: 80 }, // Harder
+      { text: "Buscar una grieta o ruta alterna", stat: 'conocimiento', difficulty: 8, damage: 10, xp: 120 }
     ]
   },
   {
@@ -93,9 +98,9 @@ const OBSTACLES = [
     minDepth: 100,
     image: golemImg,
     options: [
-      { text: "Empujarlo al vacío", stat: 'fuerza', difficulty: 15 },
-      { text: "Pasar corriendo por debajo de sus piernas", stat: 'agilidad', difficulty: 15 },
-      { text: "Desactivar su núcleo rúnico", stat: 'conocimiento', difficulty: 8 } // Lowered base, will scale up
+      { text: "Empujarlo al vacío", stat: 'fuerza', difficulty: 15, damage: 40, xp: 200 },
+      { text: "Pasar corriendo por debajo de sus piernas", stat: 'agilidad', difficulty: 15, damage: 30, xp: 180 },
+      { text: "Desactivar su núcleo rúnico", stat: 'conocimiento', difficulty: 8, damage: 20, xp: 150 } // Lowered base, will scale up
     ]
   },
   {
@@ -206,6 +211,8 @@ function App() {
   // Current explorer state (starts as baseStats)
   const [explorer, setExplorer] = useState(INITIAL_STATS);
 
+  const [currentEnergy, setCurrentEnergy] = useState(INITIAL_STATS.energia);
+
   const [gameStatus, setGameStatus] = useState('idle'); // idle, exploring, failed, victory
   const [logs, setLogs] = useState(['Te encuentras ante la entrada de la Cueva Misteriosa.']);
   const [currentObstacle, setCurrentObstacle] = useState(null);
@@ -284,9 +291,12 @@ function App() {
 
     if (success) {
       addLog(`¡ÉXITO! ${getRandomLog(SUCCESS_MSGS)}`);
-      // RESTORED: XP back to original (difficulty * 10)
-      const xpGained = option.difficulty * 10;
-      const newDepth = depth + 10; // Slow progress: 10m
+      // XP scales with effective difficulty or specific option.xp
+      const baseXP = option.xp || (option.difficulty * 10);
+      const xpGained = baseXP + (depthMalus * 10);
+      const newDepth = depth + 10;
+
+      addLog(`+${xpGained} XP`);
 
       if (newDepth >= CAVE_DEPTH_GOAL) {
         setGameStatus('victory');
@@ -300,13 +310,18 @@ function App() {
         generateObstacle(newDepth);
       }
     } else {
-      const damage = 20;
-      const newEnergy = Math.max(0, explorer.energia - damage);
-      setExplorer(prev => ({ ...prev, energia: newEnergy }));
+      // Damage scales with difficulty or uses specific option.damage
+      const baseDamage = option.damage || Math.max(10, 10 + Math.floor(option.difficulty * 0.8));
+      const damage = baseDamage + Math.floor(depthMalus * 0.8);
+      const newEnergy = Math.max(0, currentEnergy - damage);
+      setCurrentEnergy(newEnergy);
       addLog(`FALLO: ${getRandomLog(FAILURE_MSGS)} -${damage} Energía.`);
 
-      // RESTORED: XP back to 5
-      setRunXP(prev => prev + 5);
+      // Partial XP on failure (50% of what success would give)
+      const baseXP = option.xp || (option.difficulty * 10);
+      const failXP = Math.floor((baseXP + (depthMalus * 10)) * 0.5) || 5;
+      setRunXP(prev => prev + failXP);
+      addLog(`+${failXP} XP (parcial)`);
 
       if (newEnergy <= 0) {
         handleDeath();
@@ -354,10 +369,22 @@ function App() {
       setKnowledgePoints(prev => prev - cost);
 
       // Update Base Stats (Permanent)
-      setBaseStats(prev => ({ ...prev, [stat]: prev[stat] + 1 }));
+      if (stat === 'energia') {
+        setBaseStats(prev => ({ ...prev, energia: prev.energia + ENERGY_UPGRADE_STEP }));
+      } else {
+        setBaseStats(prev => ({ ...prev, [stat]: prev[stat] + 1 }));
+      }
 
       // Update Current Explorer immediately if in idle logic (which they are)
-      setExplorer(prev => ({ ...prev, [stat]: prev[stat] + 1 }));
+      if (stat === 'energia') {
+        setExplorer(prev => ({ ...prev, energia: prev.energia + ENERGY_UPGRADE_STEP }));
+      } else {
+        setExplorer(prev => ({ ...prev, [stat]: prev[stat] + 1 }));
+      }
+
+      if (stat === 'energia') {
+        setCurrentEnergy(prev => prev + ENERGY_UPGRADE_STEP);
+      }
 
       addLog(`MEJORA: ${stat.toUpperCase()} sube a ${explorer[stat] + 1}.`);
     } else {
@@ -367,7 +394,8 @@ function App() {
 
   const handleReset = () => {
     // Reset full state but keep progression
-    setExplorer(baseStats); // Reset to CURRENT base stats, not initial 1s
+    setExplorer({ ...baseStats });
+    setCurrentEnergy(baseStats.energia);
     setGameStatus('idle');
     setLogs(['Un nuevo explorador llega a la entrada...', `Encuentra ${diaries.length} diarios.`]);
     setCurrentObstacle(null);
@@ -380,6 +408,7 @@ function App() {
   const handleFullRestart = () => {
     setBaseStats(INITIAL_STATS);
     setExplorer(INITIAL_STATS);
+    setCurrentEnergy(INITIAL_STATS.energia);
     setKnowledgePoints(0);
     setDiaries([]);
     setRunXP(0);
@@ -444,9 +473,28 @@ function App() {
 
             <div className="stat-row">
               <span className="stat-label" style={{ color: 'var(--energy)' }}>Energía</span>
-              <span className="stat-value">{explorer.energia}</span>
+              <span className="stat-value">{currentEnergy} <span style={{ fontSize: '0.6rem', color: '#666' }}>/ {explorer.energia}</span></span>
             </div>
-            <div className="stat-bar energy"><div style={{ width: `${explorer.energia}%` }}></div></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <div className="stat-bar energy" style={{ flex: 1, marginBottom: 0 }}><div style={{ width: `${(currentEnergy / explorer.energia) * 100}%` }}></div></div>
+              {gameStatus === 'idle' && (
+                <button
+                  disabled={knowledgePoints < getUpgradeCost(explorer.energia) || explorer.energia >= MAX_ENERGY}
+                  onClick={() => handleUpgrade('energia')}
+                  style={{
+                    padding: '2px 8px',
+                    fontSize: '0.7rem',
+                    background: (explorer.energia >= MAX_ENERGY) ? '#333' : (knowledgePoints >= getUpgradeCost(explorer.energia) ? 'var(--success)' : '#444'),
+                    color: (explorer.energia >= MAX_ENERGY) ? '#888' : '#000',
+                    fontWeight: 'bold',
+                    cursor: (explorer.energia >= MAX_ENERGY) ? 'default' : 'pointer'
+                  }}
+                  title={explorer.energia >= MAX_ENERGY ? 'Máximo alcanzado' : `Mejorar (+${ENERGY_UPGRADE_STEP}) (Costo: ${getUpgradeCost(explorer.energia)})`}
+                >
+                  {explorer.energia >= MAX_ENERGY ? 'MAX' : '+'}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Prompt 4/5: Show Diaries Shelf */}
@@ -490,12 +538,12 @@ function App() {
             {/* Fallback / Loading if exploring but no obstacle yet (rare) */}
             {gameStatus === 'exploring' && !currentObstacle && <div className="cave-mouth"></div>}
 
-            {/* Victory/Failed could use images too if we have them */}
-            {(gameStatus === 'victory' || gameStatus === 'failed') && (
-              // For now, if we don't have victory/fail images, we can show the last obstacle or start,
-              // or just the overlay. Let's show start screen faded?
-              // Or better, keep using the cave-mouth default for now if no specific image.
-              <div className="cave-mouth"></div>
+            {/* Victory/Failed images */}
+            {gameStatus === 'victory' && (
+              <img src={victoryImg} className="cave-image" alt="Victoria" />
+            )}
+            {gameStatus === 'failed' && (
+              <img src={defeatImg} className="cave-image" alt="Derrota" />
             )}
 
             {gameStatus === 'exploring' && (
@@ -538,7 +586,7 @@ function App() {
             )}
 
             {gameStatus === 'failed' && (
-              <div className="failed-state">
+              <div className="failed-state" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', padding: '20px' }}>
                 <p className="failure-text">El explorador ha caído.</p>
                 <div style={{ color: 'var(--accent)', marginBottom: '10px' }}>
                   Se ha guardado un Diario con {runXP} XP.
