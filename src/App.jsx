@@ -234,9 +234,10 @@ function App() {
       + (explorer.conocimiento - INITIAL_STATS.conocimiento)
       + energyLevels;
 
-    if (score >= 24) return 'Leyenda';
-    if (score >= 16) return 'Maestro';
-    if (score >= 8) return 'Aventurero';
+    if (score >= 80) return 'Leyenda';
+    if (score > 60) return 'Gran Maestro';
+    if (score > 40) return 'Maestro';
+    if (score > 20) return 'Aventurero';
     return 'Novato';
   };
 
