@@ -241,12 +241,16 @@ function App() {
     return 'Novato';
   };
 
-  const getXpForSuccess = (difficulty) => {
-    return Math.max(5, Math.min(40, Math.floor(difficulty * 4)));
+  const getXpForSuccess = (obstacleMinDepth) => {
+    if (obstacleMinDepth >= 200) return 60;
+    if (obstacleMinDepth >= 100) return 40;
+    return 20;
   };
 
-  const getXpForFailure = (successXp) => {
-    return Math.max(2, Math.floor(successXp * 0.25));
+  const getXpForFailure = (obstacleMinDepth) => {
+    if (obstacleMinDepth >= 200) return 20;
+    if (obstacleMinDepth >= 100) return 10;
+    return 5;
   };
 
   // Helper to calculate cost: Base * 1.2 ^ (Current - 1)
@@ -311,9 +315,11 @@ function App() {
 
     addLog(`> Acción: ${option.text}`);
 
+    const obsMinDepth = currentObstacle ? currentObstacle.minDepth : 0;
+
     if (success) {
       addLog(`¡ÉXITO! ${getRandomLog(SUCCESS_MSGS)}`);
-      const xpGained = getXpForSuccess(effectiveDifficulty);
+      const xpGained = getXpForSuccess(obsMinDepth);
       const newDepth = depth + 10;
 
       addLog(`+${xpGained} XP`);
@@ -330,14 +336,12 @@ function App() {
         generateObstacle(newDepth);
       }
     } else {
-      // Damage scales with difficulty or uses specific option.damage
-      const baseDamage = option.damage || 20;
-      const damage = baseDamage + Math.floor(depthMalus * 0.8);
+      const damage = option.damage || 20;
       const newEnergy = Math.max(0, currentEnergy - damage);
       setCurrentEnergy(newEnergy);
       addLog(`FALLO: ${getRandomLog(FAILURE_MSGS)} -${damage} Energía.`);
 
-      const failXP = getXpForFailure(getXpForSuccess(effectiveDifficulty));
+      const failXP = getXpForFailure(obsMinDepth);
       setRunXP(prev => prev + failXP);
       addLog(`+${failXP} XP (parcial)`);
 
