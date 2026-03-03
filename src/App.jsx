@@ -317,7 +317,7 @@ function App() {
       }
     } else {
       // Damage scales with difficulty or uses specific option.damage
-      const baseDamage = option.damage || Math.max(20, 20 + Math.floor(option.difficulty * 0.8));
+      const baseDamage = option.damage || 20;
       const damage = baseDamage + Math.floor(depthMalus * 0.8);
       const newEnergy = Math.max(0, currentEnergy - damage);
       setCurrentEnergy(newEnergy);
@@ -361,38 +361,40 @@ function App() {
     addLog(`Recuperas el conocimiento perdido: +${totalXP} Puntos.`);
   };
 
+  // Energy "level" for cost calculation: level 1 at base 100, level 2 at 110, etc.
+  const getEnergyLevel = () => Math.floor((explorer.energia - INITIAL_STATS.energia) / ENERGY_UPGRADE_STEP) + 1;
+
   const handleUpgrade = (stat) => {
-    const currentVal = explorer[stat];
-    const cost = getUpgradeCost(currentVal);
-
-    if (currentVal >= MAX_STAT) {
-      addLog(`¡${stat.toUpperCase()} ya está al máximo!`);
-      return;
-    }
-    if (knowledgePoints >= cost) {
-      setKnowledgePoints(prev => prev - cost);
-
-      // Update Base Stats (Permanent)
-      if (stat === 'energia') {
+    if (stat === 'energia') {
+      if (explorer.energia >= MAX_ENERGY) {
+        addLog(`¡ENERGÍA ya está al máximo!`);
+        return;
+      }
+      const cost = getUpgradeCost(getEnergyLevel());
+      if (knowledgePoints >= cost) {
+        setKnowledgePoints(prev => prev - cost);
         setBaseStats(prev => ({ ...prev, energia: prev.energia + ENERGY_UPGRADE_STEP }));
-      } else {
-        setBaseStats(prev => ({ ...prev, [stat]: prev[stat] + 1 }));
-      }
-
-      // Update Current Explorer immediately if in idle logic (which they are)
-      if (stat === 'energia') {
         setExplorer(prev => ({ ...prev, energia: prev.energia + ENERGY_UPGRADE_STEP }));
-      } else {
-        setExplorer(prev => ({ ...prev, [stat]: prev[stat] + 1 }));
-      }
-
-      if (stat === 'energia') {
         setCurrentEnergy(prev => prev + ENERGY_UPGRADE_STEP);
+        addLog(`MEJORA: ENERGÍA sube a ${explorer.energia + ENERGY_UPGRADE_STEP}.`);
+      } else {
+        addLog(`Necesitas ${cost} Puntos de Conocimiento.`);
       }
-
-      addLog(`MEJORA: ${stat.toUpperCase()} sube a ${explorer[stat] + 1}.`);
     } else {
-      addLog(`Necesitas ${cost} Puntos de Conocimiento.`);
+      const currentVal = explorer[stat];
+      const cost = getUpgradeCost(currentVal);
+      if (currentVal >= MAX_STAT) {
+        addLog(`¡${stat.toUpperCase()} ya está al máximo!`);
+        return;
+      }
+      if (knowledgePoints >= cost) {
+        setKnowledgePoints(prev => prev - cost);
+        setBaseStats(prev => ({ ...prev, [stat]: prev[stat] + 1 }));
+        setExplorer(prev => ({ ...prev, [stat]: prev[stat] + 1 }));
+        addLog(`MEJORA: ${stat.toUpperCase()} sube a ${explorer[stat] + 1}.`);
+      } else {
+        addLog(`Necesitas ${cost} Puntos de Conocimiento.`);
+      }
     }
   };
 
@@ -483,17 +485,17 @@ function App() {
               <div className="stat-bar energy" style={{ flex: 1, marginBottom: 0 }}><div style={{ width: `${(currentEnergy / explorer.energia) * 100}%` }}></div></div>
               {gameStatus === 'idle' && (
                 <button
-                  disabled={knowledgePoints < getUpgradeCost(explorer.energia) || explorer.energia >= MAX_ENERGY}
+                  disabled={knowledgePoints < getUpgradeCost(getEnergyLevel()) || explorer.energia >= MAX_ENERGY}
                   onClick={() => handleUpgrade('energia')}
                   style={{
                     padding: '2px 8px',
                     fontSize: '0.7rem',
-                    background: (explorer.energia >= MAX_ENERGY) ? '#333' : (knowledgePoints >= getUpgradeCost(explorer.energia) ? 'var(--success)' : '#444'),
+                    background: (explorer.energia >= MAX_ENERGY) ? '#333' : (knowledgePoints >= getUpgradeCost(getEnergyLevel()) ? 'var(--success)' : '#444'),
                     color: (explorer.energia >= MAX_ENERGY) ? '#888' : '#000',
                     fontWeight: 'bold',
                     cursor: (explorer.energia >= MAX_ENERGY) ? 'default' : 'pointer'
                   }}
-                  title={explorer.energia >= MAX_ENERGY ? 'Máximo alcanzado' : `Mejorar (+${ENERGY_UPGRADE_STEP}) (Costo: ${getUpgradeCost(explorer.energia)})`}
+                  title={explorer.energia >= MAX_ENERGY ? 'Máximo alcanzado' : `Mejorar (+${ENERGY_UPGRADE_STEP}) (Costo: ${getUpgradeCost(getEnergyLevel())})`}
                 >
                   {explorer.energia >= MAX_ENERGY ? 'MAX' : '+'}
                 </button>
