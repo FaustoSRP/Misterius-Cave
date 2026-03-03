@@ -54,9 +54,9 @@ const OBSTACLES = [
     minDepth: 0,
     image: collapseImg,
     options: [
-      { text: "Intentar mover las rocas", stat: 'fuerza', difficulty: 2, damage: 15, xp: 50 }, // Optimal (Easy start)
-      { text: "Tratar de escalar por encima", stat: 'agilidad', difficulty: 5, damage: 20, xp: 80 }, // Harder
-      { text: "Buscar una grieta o ruta alterna", stat: 'conocimiento', difficulty: 8, damage: 10, xp: 120 }
+      { text: "Intentar mover las rocas", stat: 'fuerza', difficulty: 2, xp: 50 }, // Optimal (Easy start)
+      { text: "Tratar de escalar por encima", stat: 'agilidad', difficulty: 5, xp: 80 }, // Harder
+      { text: "Buscar una grieta o ruta alterna", stat: 'conocimiento', difficulty: 8, xp: 120 }
     ]
   },
   {
@@ -98,9 +98,9 @@ const OBSTACLES = [
     minDepth: 100,
     image: golemImg,
     options: [
-      { text: "Empujarlo al vacío", stat: 'fuerza', difficulty: 15, damage: 40, xp: 200 },
-      { text: "Pasar corriendo por debajo de sus piernas", stat: 'agilidad', difficulty: 15, damage: 30, xp: 180 },
-      { text: "Desactivar su núcleo rúnico", stat: 'conocimiento', difficulty: 8, damage: 20, xp: 150 } // Lowered base, will scale up
+      { text: "Empujarlo al vacío", stat: 'fuerza', difficulty: 15, xp: 200 },
+      { text: "Pasar corriendo por debajo de sus piernas", stat: 'agilidad', difficulty: 15, xp: 180 },
+      { text: "Desactivar su núcleo rúnico", stat: 'conocimiento', difficulty: 8, xp: 150 } // Lowered base, will scale up
     ]
   },
   {
@@ -336,7 +336,7 @@ function App() {
         generateObstacle(newDepth);
       }
     } else {
-      const damage = option.damage || 20;
+      const damage = 20;
       const newEnergy = Math.max(0, currentEnergy - damage);
       setCurrentEnergy(newEnergy);
       addLog(`FALLO: ${getRandomLog(FAILURE_MSGS)} -${damage} Energía.`);
