@@ -317,7 +317,7 @@ function App() {
       }
     } else {
       // Damage scales with difficulty or uses specific option.damage
-      const baseDamage = option.damage || Math.max(10, 10 + Math.floor(option.difficulty * 0.8));
+      const baseDamage = option.damage || Math.max(20, 20 + Math.floor(option.difficulty * 0.8));
       const damage = baseDamage + Math.floor(depthMalus * 0.8);
       const newEnergy = Math.max(0, currentEnergy - damage);
       setCurrentEnergy(newEnergy);
