@@ -235,9 +235,9 @@ function App() {
       + energyLevels;
 
     if (score >= 80) return 'Leyenda';
-    if (score > 60) return 'Gran Maestro';
-    if (score > 40) return 'Maestro';
-    if (score > 20) return 'Aventurero';
+    if (score >= 60) return 'Gran Maestro';
+    if (score >= 40) return 'Maestro';
+    if (score >= 20) return 'Aventurero';
     return 'Novato';
   };
 
