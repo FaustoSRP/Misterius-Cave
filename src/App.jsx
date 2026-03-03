@@ -227,6 +227,19 @@ function App() {
 
   const getRandomLog = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
+  const getRankFromStats = () => {
+    const energyLevels = Math.floor((explorer.energia - INITIAL_STATS.energia) / ENERGY_UPGRADE_STEP);
+    const score = (explorer.fuerza - INITIAL_STATS.fuerza)
+      + (explorer.agilidad - INITIAL_STATS.agilidad)
+      + (explorer.conocimiento - INITIAL_STATS.conocimiento)
+      + energyLevels;
+
+    if (score >= 24) return 'Leyenda';
+    if (score >= 16) return 'Maestro';
+    if (score >= 8) return 'Aventurero';
+    return 'Novato';
+  };
+
   const getXpForSuccess = (difficulty) => {
     return Math.max(5, Math.min(40, Math.floor(difficulty * 4)));
   };
@@ -438,7 +451,7 @@ function App() {
             👤
           </div>
           <div className="rank-display" style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '10px' }}>
-            Rango: <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{explorer.rango}</span>
+            Rango: <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{getRankFromStats()}</span>
           </div>
 
           <div style={{ background: 'rgba(212, 160, 23, 0.1)', border: '1px solid var(--accent)', padding: '10px', borderRadius: '8px', marginBottom: '20px', textAlign: 'center' }}>
